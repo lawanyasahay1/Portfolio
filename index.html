@@ -1,0 +1,226 @@
+import React, { useEffect, useRef, useState } from 'react';
+
+export default function Portfolio() {
+  const [themeDark, setThemeDark] = useState(true);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const confettiRef = useRef(null);
+  const confettiAnimRef = useRef(null);
+
+  const profile = {
+    name: 'Lavanya Sahay',
+    title: 'DevOps Engineer',
+    location: 'Bengaluru, Karnataka',
+    email: 'sahaylawanya@gmail.com',
+    github: 'https://github.com/lawanyasahay1',
+    linkedin: 'https://www.linkedin.com/in/lawanya-sahay-084308235',
+    resume: '#',
+    tagline:
+      'I automate infrastructure, secure cloud deployments, and build observability for production systems.'
+  };
+
+  const skills = [
+    'Git','Kubernetes','Docker','Jenkins','Ansible','Terraform','Bash','Linux','Networking','Python',
+    'Java','Golang','SQL','Windows','macOS','JavaScript','HTML','CSS','NoSQL','Spring','AWS','Azure',
+    'Monitoring','Logging','SSH','Security','Automation','Containerization','Cloud','Scripting','CI/CD',
+    'Storage','Firewall','SELinux','MFA','Parsing','Testing','Scaling','Deployment'
+  ];
+
+  const projects = [
+    {
+      title: 'Academic Performance Analyzer — Java',
+      desc: 'Developed a Java-based tool to calculate SGPA and CGPA by processing subject-wise credits and marks. Implemented robust input handling, manual parsing, and an automated grading system.',
+      tags: ['Java','Parsing','Algorithms']
+    },
+    {
+      title: 'Remote SSH Connection Tool — Go',
+      desc: 'Created a Go application enabling SSH connections from Windows PowerShell to remote Ubuntu servers. Automated package updates with timestamped logging.',
+      tags: ['Golang','SSH','Windows']
+    },
+    {
+      title: 'Security Patch Automation — Go',
+      desc: 'Built a Go program to automate security patch installation on remote Ubuntu servers via SSH, featuring live I/O forwarding for real-time update tracking.',
+      tags: ['Golang','SSH','Automation']
+    },
+    {
+      title: 'CVE Extraction & Patch Analysis — Go',
+      desc: 'Engineered a Golang SSH tool to analyze security patches and extract CVE identifiers from system logs using regex parsing.',
+      tags: ['Golang','Regex','Security']
+    },
+    {
+      title: 'Multi-threaded SSH Login Tester — Go',
+      desc: 'Developed a multi-threaded SSH login testing tool in Go simulating concurrent logins using private key authentication.',
+      tags: ['Golang','Performance','Testing']
+    },
+    {
+      title: 'End-to-End Cloud & DevOps Workflows — Multi-Cloud',
+      desc: 'Designed and deployed end-to-end infrastructure using Azure & multi-cloud platforms. Included secure VM provisioning, network security, MFA, CI/CD, Terraform & Ansible automation, and observability.',
+      tags: ['Azure','Terraform','CI/CD','Observability']
+    }
+  ];
+
+  useEffect(() => {
+    if (!showConfetti) return;
+    const canvas = confettiRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let rafId = null;
+    let stopTimeout = null;
+
+    function setSize() {
+      const dpr = typeof window !== 'undefined' && window.devicePixelRatio ? window.devicePixelRatio : 1;
+      const W = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+      const H = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+      canvas.width = Math.floor(W * dpr);
+      canvas.height = Math.floor(H * dpr);
+      canvas.style.width = W + 'px';
+      canvas.style.height = H + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      return { W, H };
+    }
+
+    const { W, H } = setSize();
+
+    function rand(min, max) { return Math.random() * (max - min) + min; }
+
+    function createParticles(count = 120) {
+      particles = [];
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: W / 2 + rand(-200, 200),
+          y: H / 4 + rand(-50, 50),
+          vx: rand(-6, 6),
+          vy: rand(-8, 6),
+          size: Math.floor(rand(6, 12)),
+          color: `hsl(${Math.floor(rand(0,360))},70%,60%)`,
+          rot: rand(0, Math.PI*2),
+          vrota: rand(-0.2,0.2),
+        });
+      }
+    }
+
+    function update() {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.25;
+        p.rot += p.vrota;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size*0.6);
+        ctx.restore();
+      }
+    }
+
+    function loop() {
+      update();
+      rafId = requestAnimationFrame(loop);
+      confettiAnimRef.current = rafId;
+    }
+
+    createParticles();
+    loop();
+
+    stopTimeout = setTimeout(() => {
+      if (rafId) cancelAnimationFrame(rafId);
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      setShowConfetti(false);
+    }, 2500);
+
+    function handleResize() {
+      setSize();
+    }
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      if (stopTimeout) clearTimeout(stopTimeout);
+      if (rafId) cancelAnimationFrame(rafId);
+      window.removeEventListener('resize', handleResize);
+      try { ctx.clearRect(0,0,canvas.width,canvas.height); } catch (e) {}
+    };
+  }, [showConfetti]);
+
+  const cardClasses = themeDark ? 'p-4 rounded-xl bg-neutral-800' : 'p-4 rounded-xl bg-gray-100';
+  const projectCardClasses = themeDark ? 'p-4 rounded-lg bg-neutral-900 border' : 'p-4 rounded-lg bg-white border';
+
+  return (
+    <div className={themeDark ? 'min-h-screen bg-neutral-900 text-gray-100' : 'min-h-screen bg-white text-gray-900'}>
+      <canvas ref={confettiRef} style={{ position: 'fixed', left: 0, top: 0, pointerEvents: 'none', zIndex: 60 }} />
+      <div className="max-w-6xl mx-auto p-6 md:p-12">
+        <header className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-extrabold">{profile.name}</h1>
+            <p className="text-sm opacity-80 mt-1">{profile.title} • {profile.location}</p>
+            <p className="mt-3 text-sm max-w-xl text-opacity-90">{profile.tagline}</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <a href={profile.github} target="_blank" rel="noreferrer" className="px-3 py-1 text-xs rounded-full border flex items-center gap-2">GitHub</a>
+              <a href={profile.linkedin} target="_blank" rel="noreferrer" className="px-3 py-1 text-xs rounded-full border flex items-center gap-2">LinkedIn</a>
+              <a href={`mailto:${profile.email}`} className="px-3 py-1 text-xs rounded-full border flex items-center gap-2">Email</a>
+              <button onClick={() => setShowConfetti(true)} className="px-3 py-1 text-xs rounded-full bg-rose-600 text-white">Click here 🎉</button>
+            </div>
+          </div>
+          <div className="ml-auto flex items-center gap-3">
+            <button onClick={() => setThemeDark(!themeDark)} className="text-sm px-3 py-1 rounded border">Toggle theme</button>
+            <a href={`${profile.github}?tab=repositories`} target="_blank" rel="noreferrer" className="text-sm px-3 py-1 rounded border">Repos</a>
+          </div>
+        </header>
+        <main className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <aside className="md:col-span-1 space-y-6">
+            <section className={cardClasses}>
+              <h3 className="text-lg font-semibold mb-2">About</h3>
+              <p className="text-sm opacity-90">I build secure infrastructure, automation pipelines and observability for production systems.</p>
+            </section>
+            <section className={cardClasses}>
+              <h3 className="text-lg font-semibold mb-2">Experience</h3>
+              <ul className="text-sm space-y-1">
+                <li>Technical Consultant</li>
+                <li>Prodevans Technologies Pvt Ltd</li>
+                <li>July 2025 - Present</li>
+              </ul>
+            </section>
+          </aside>
+          <section className="md:col-span-2 space-y-6">
+            <div className={cardClasses}>
+              <h3 className="text-lg font-semibold mb-3">Skills</h3>
+              <div className="flex flex-wrap gap-2">
+                {skills.map((s) => (
+                  <span key={s} className="text-xs px-3 py-1 rounded-full border">{s}</span>
+                ))}
+              </div>
+            </div>
+            <div className={cardClasses}>
+              <h3 className="text-lg font-semibold mb-3">Projects</h3>
+              <div className="grid gap-4">
+                {projects.map((p) => (
+                  <article key={p.title} className={projectCardClasses}>
+                    <h4 className="font-semibold">{p.title}</h4>
+                    <p className="text-sm opacity-90 mt-1">{p.desc}</p>
+                    <div className="mt-2 flex gap-2 flex-wrap text-xs">
+                      {p.tags.map((t) => <span key={t} className="px-2 py-0.5 rounded border">{t}</span>)}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+            <div className={cardClasses}>
+              <h3 className="text-lg font-semibold mb-3">Education</h3>
+              <ul className="text-sm space-y-1 list-disc list-inside">
+                <p>Visvesvaraya Technological University</p>
+                <li>Jan 2022-May 2025</li>
+                <li>Bachelor of Engineering</li>
+              </ul>
+            </div>
+          </section>
+        </main>
+        <footer className="mt-12 text-center text-sm opacity-80">
+          © {new Date().getFullYear()} {profile.name} 
+        </footer>
+      </div>
+    </div>
+  );
+}
